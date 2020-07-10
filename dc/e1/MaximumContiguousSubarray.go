@@ -18,6 +18,8 @@ Between which two years profit is maximized ?
  	fmt.Printf("BruteForceAlgorithm,MAX=%d,(%d,%d)\n",VMAX,VS,VE)
 	 VMAX,VS,VE = DataReuseAlgorithm(A)
 	 fmt.Printf("DataReuseAlgorithm,MAX=%d,(%d,%d)\n",VMAX,VS,VE)
+	 VMAX,VS,VE = MCS(A,0,len(A)-1)
+	 fmt.Printf("MCSAlgorithm,MAX=%d,(%d,%d)\n",VMAX,VS,VE)
  }
 
  /**
@@ -86,3 +88,68 @@ Between which two years profit is maximized ?
 	 }
 	 return VMAX,VS,VE
  }
+
+ /**
+ time complexity O(nlogn)
+ MCS(A,s,t)
+ Input: A[s...t] with s <= t
+ Output: MCS of A [s...t]
+ begin
+ 	if s = t then return A[s];
+ 	else
+ 		m <- [(s+t)/2];
+ 		Find MCS(A,s,m);
+ 		Find MCS(A,m+1,t);
+ 		Find MCS that contains both A[m] and A[m+1];
+ 		return maximum of the three sequences found
+ 	end
+ end
+
+ First Call: MCS(A,1,n)
+
+  */
+func MCS(A []int, s int, t int) (int, int, int) {
+	VMAX := 0
+	VS := -1
+	VE := -1
+	if s == t {
+		VS = s
+		VE = s
+		return A[s], VS, VE
+	}
+	m := (s + t) / 2
+	max1, VS, VE := MCS(A, s, m)
+	max2, VS, VE := MCS(A, m+1, t)
+	//cal max3
+	lMax := 0
+	lTotal := 0
+	rMax := 0
+	rTotal := 0
+	max3 := lMax + rMax
+	//cal left max val from index m to s
+	for i := m; i >= s; i-- {
+		lTotal += A[i]
+		if lTotal > lMax {
+			lMax = lTotal
+			VS = i
+		}
+	}
+	//cal right max val from index m+1 to t
+	for j := m + 1; j <= t; j++ {
+		rTotal += A[j]
+		if rTotal > rMax {
+			rMax = rTotal
+			VE = j
+		}
+	}
+	max3 = lMax + rMax
+	// compare max1,max2,max3
+	VMAX = max1
+	if VMAX < max2 {
+		VMAX = max2
+	}
+	if VMAX < max3 {
+		VMAX = max3
+	}
+	return VMAX, VS, VE
+}
